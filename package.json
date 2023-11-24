@@ -1,16 +1,16 @@
 {
-  "name": "chatcord",
+  "name": "skynet-chat",
   "version": "1.0.0",
-  "description": "Realtime chat app with rooms",
+  "description": "Realtime chat app with channels",
   "main": "server.js",
   "scripts": {
-    "docker-up": "docker-compose -p chatcord up -d",
+    "docker-up": "docker-compose -p skynet-chat up -d",
     "start": "npm run docker-up && node server",
     "dev": "npm run docker-up && node --watch server",
-    "stop": "docker-compose -p chatcord down",
-    "docker-down": "docker-compose -p chatcord down -v --rmi all"
+    "stop": "docker-compose -p skynet-chat down",
+    "docker-down": "docker-compose -p skynet-chat down -v --rmi all"
   },
-  "author": "Brad Traversy",
+  "author": "Joel Biddle",
   "license": "MIT",
   "dependencies": {
     "@socket.io/redis-adapter": "^8.2.1",
