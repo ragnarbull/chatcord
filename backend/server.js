@@ -1,11 +1,11 @@
-const path = require("path");
 const http = require("http");
 const express = require("express");
+const cors = require("cors");
 const socketio = require("socket.io");
-const formatMessage = require("./utils/messages");
 const createAdapter = require("@socket.io/redis-adapter").createAdapter;
 const redis = require("redis");
-const { createClient } = redis;
+
+const formatMessage = require("./utils/messages");
 const {
   userJoin,
   getCurrentUser,
@@ -14,10 +14,22 @@ const {
 } = require("./utils/users");
 
 const app = express();
-const server = http.createServer(app);
-const io = socketio(server);
+const { createClient } = redis;
 
-app.use(express.static(path.join(__dirname, '../Client/Public')));
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+const server = http.createServer(app);
+const io = socketio(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
+});
 
 const botName = "SkyNet Bot";
 let pubClient, subClient;
@@ -78,38 +90,31 @@ let pubClient, subClient;
 
 // Run when client connects
 io.on("connection", (socket) => {
-  console.log(io.of("/").adapter);
+  // console.log(io.of("/").adapter);
   socket.on("joinChannel", ({ username, channel }) => {
     const user = userJoin(socket.id, username, channel);
 
     socket.join(user.channel);
 
-    // Welcome current user
+    io.to(user.channel).emit("channelUsers", {
+      channel: user.channel,
+      users: getChannelUsers(user.channel),
+    });
+
     socket.emit("message", formatMessage(botName, "Welcome to SkyNet Chat!"));
 
-    // Broadcast when a user connects
     socket.broadcast
       .to(user.channel)
       .emit(
         "message",
         formatMessage(botName, `${user.username} has joined the chat`)
       );
-
-    // Send users and channel info
-    io.to(user.channel).emit("channelUsers", {
-      channel: user.channel,
-      users: getChannelUsers(user.channel),
-    });
   });
 
-  // Listen for chatMessage
-  socket.on("chatMessage", (msg) => {
-    const user = getCurrentUser(socket.id);
-
-    io.to(user.channel).emit("message", formatMessage(user.username, msg));
+  socket.on('chatMessage', ({ text, user, channel }) => {
+    io.to(channel).emit('message', formatMessage(user.username, text));
   });
 
-  // Runs when client disconnects
   socket.on("disconnect", () => {
     const user = userLeave(socket.id);
 
@@ -119,7 +124,6 @@ io.on("connection", (socket) => {
         formatMessage(botName, `${user.username} has left the chat`)
       );
 
-      // Send users and channel info
       io.to(user.channel).emit("channelUsers", {
         channel: user.channel,
         users: getChannelUsers(user.channel),
@@ -129,5 +133,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
 server.listen(PORT, () => console.log(`Server running on port ${PORT}...`));
