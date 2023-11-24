@@ -28,13 +28,15 @@
                         id="username"
                         placeholder="Enter username..."
                         required
+                        pattern="[a-zA-Z0-9]{3,}"
+                        title="Username must be at least 3 characters and contain only letters and numbers."
                     />
                 </div>
                 <div class="form-control">
                     <label for="channel">Active Channels</label>
-                    <select name="channel" id="channel">
+                    <select name="channel" id="channel" onchange="toggleNewChannelInput()">
                         <!-- Add existing channels as options -->
-                        <option value="" disabled selected>Select channel</option>
+                        <option value="" disabled selected></option>
                         <!-- Dynamically populate dropdown with existing channels from local storage -->
                         <!-- If no channels are available, the dropdown will be empty -->
                         <script>
@@ -60,9 +62,25 @@
     </div>
 
     <script>
+        function toggleNewChannelInput() {
+            var channelDropdown = document.getElementById("channel");
+            var newChannelInput = document.getElementById("newChannel");
+
+            // Enable or disable the new channel input based on whether an existing channel is selected
+            newChannelInput.disabled = channelDropdown.value !== "";
+        }
+
         function joinChat() {
-            var form = document.getElementById("joinForm");
-            var username = form.elements["username"].value;
+					  var form = document.getElementById("joinForm");
+            var usernameInput = form.elements["username"];
+            var username = usernameInput.value.trim();
+
+            if (username.length < 3 || !/^[a-zA-Z0-9]+$/.test(username)) {
+                alert("Username must be at least 3 characters and contain only letters and numbers.");
+                usernameInput.focus();
+                return;
+            }
+
             var selectedChannel = form.elements["channel"].value;
             var newChannel = form.elements["newChannel"].value;
 
@@ -74,8 +92,6 @@
                 existingChannels.push(newChannel);
                 localStorage.setItem("channels", JSON.stringify(existingChannels));
             }
-
-            // Perform any necessary validation or channel creation logic here
 
             // Redirect to the chat.html page with the username and channel parameters
             window.location.href = "chat.html?username=" + encodeURIComponent(username) + "&channel=" + encodeURIComponent(channel);
