@@ -71,9 +71,7 @@ else
     done
 fi
 
-echo -e "\n################"
-echo -e "# OpenSSL conf #"
-echo -e "################\n"
+# Use openssl config
 
 GK_C=${TLS_COUNTRY_CODE:-""}
 
