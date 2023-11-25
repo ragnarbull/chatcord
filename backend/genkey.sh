@@ -1,32 +1,5 @@
 #!/bin/bash
 
-# Generate random passphrase
-passphrase_length=64
-TLS_PASSPHRASE=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c $passphrase_length)
-
-# Check if .env file exists
-if [ -f .env ]; then
-    # Check if TLS_PASSPHRASE is already set in .env
-    if grep -q "^TLS_PASSPHRASE=" .env; then
-        # Update TLS_PASSPHRASE
-        sed -i "s|^TLS_PASSPHRASE=.*$|TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"|" .env
-    else
-        # Append TLS_PASSPHRASE on a new line
-        echo "TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"" >> .env
-    fi
-else
-    # .env file doesn't exist, create it with TLS_PASSPHRASE
-    echo "TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"" > .env
-fi
-
-# Load environment variables from .env file
-if [ -f .env ]; then
-    source .env
-fi
-
-# Check envars are loaded in shell (TESTING ONLY!!!)
-# echo "DEBUG: TLS_PASSPHRASE=$TLS_PASSPHRASE"
-
 if test $# -eq 0; then
     echo "Usage: ./genkey.sh <path to store certs directory>"
     exit 0
@@ -65,6 +38,27 @@ echo -e "#######################################################################
 echo -e "###############"
 echo -e "# Global conf #"
 echo -e "###############\n"
+
+# Generate random passphrase
+passphrase_length=64
+TLS_PASSPHRASE=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c $passphrase_length)
+
+# Check if .env file exists
+if [ -f .env ]; then
+    # Check if TLS_PASSPHRASE is already set in .env
+    if grep -q "^TLS_PASSPHRASE=" .env; then
+        sed -i "s|^TLS_PASSPHRASE=.*$|TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"|" .env
+    else
+        echo "TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"" >> .env
+    fi
+else
+    echo "TLS_PASSPHRASE=\"$TLS_PASSPHRASE\"" > .env
+fi
+
+# Load environment variables from .env file
+if [ -f .env ]; then
+    source .env
+fi
 
 RSABITS=4096
 
