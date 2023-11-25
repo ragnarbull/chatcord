@@ -15,7 +15,7 @@ export const ChatPage = () => {
   const [newMessage, setNewMessage] = useState<string>('');
 
   useEffect(() => {
-    const socket = io('http://localhost:3000');
+    const socket = io('https://localhost:3000');
 
     socket.emit('joinChannel', { username, channel });
 

@@ -1,4 +1,4 @@
-const http = require("http");
+const https = require("https");
 const express = require("express");
 const cors = require("cors");
 const socketio = require("socket.io");
@@ -16,14 +16,25 @@ const {
 const app = express();
 const { createClient } = redis;
 
-const corsOptions = {
+const corsOps = {
   origin: 'http://localhost:5173',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 };
-app.use(cors(corsOptions));
 
-const server = http.createServer(app);
+app.use(cors(corsOps));
+
+const httpsOpts = {
+  key: fs.readFileSync('certs/server/server.key'),
+  cert: fs.readFileSync('certs/server/server.crt'),
+  ca: fs.readFileSync('certs/ca/ca.crt'),
+  requestCert: true,
+  //rejectUnauthorized: false, // act on unauthorized clients at the app level
+};
+
+// use HTTPS
+const server = https.createServer(httpsOpts, app);
+
 const io = socketio(server, {
   cors: {
     origin: "http://localhost:5173",
