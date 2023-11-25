@@ -17,28 +17,6 @@ PATH_CA=$ROOTPATH/certs/ca
 PATH_SERVER=$ROOTPATH/certs/server
 PATH_TMP=$ROOTPATH/certs/tmp
 
-echo "###############################################################################"
-echo -e "#\033[91;34m     _____      _  __        _____ _                      _                  \033[0m#"
-echo -e "#\033[91;34m    /  ___|    | |/ _|      /  ___(_)                    | |                 \033[0m#"
-echo -e "#\033[91;34m    \ \`--.  ___| | |_ ______\ \`--. _  __ _ _ __   ___  __| |                 \033[0m#"
-echo -e "#\033[91;34m     \`--. \/ _ \ |  _|______|\`--. \ |/ _\` | '_ \ / _ \/ _\` |                 \033[0m#"
-echo -e "#\033[91;34m    /\__/ /  __/ | |        /\__/ / | (_| | | | |  __/ (_| |                 \033[0m#"
-echo -e "#\033[91;34m    \____/ \___|_|_|        \____/|_|\__, |_| |_|\___|\__,_|                 \033[0m#"
-echo -e "#\033[91;34m                                      __/ |                                  \033[0m#"
-echo -e "#\033[91;34m                                     |___/                                   \033[0m#"
-echo -e "#\033[91;34m   _____           _         _____                           _               \033[0m#"
-echo -e "#\033[91;34m  /  __ \         | |       |  __ \                         | |              \033[0m#"
-echo -e "#\033[91;34m  | /  \/ ___ _ __| |_ ___  | |  \/ ___ _ __   ___ _ __ __ _| |_ ___  _ __   \033[0m#"
-echo -e "#\033[91;34m  | |    / _ \ '__| __/ __| | | __ / _ \ '_ \ / _ \ '__/ _\` | __/ _ \| '__|  \033[0m#"
-echo -e "#\033[91;34m  | \__/\  __/ |  | |_\__ \ | |_\ \  __/ | | |  __/ | | (_| | || (_) | |     \033[0m#"
-echo -e "#\033[91;34m   \____/\___|_|   \__|___/  \____/\___|_| |_|\___|_|  \__,_|\__\___/|_|     \033[0m#"
-echo -e "#\033[91;34m                                                                             \033[0m#"
-echo -e "###############################################################################\n"
-
-echo -e "###############"
-echo -e "# Global conf #"
-echo -e "###############\n"
-
 # Generate random passphrase
 passphrase_length=64
 TLS_PASSPHRASE=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c $passphrase_length)
@@ -261,13 +239,7 @@ while [ "$ADD_OTHER_FIELD" = "y" ] || [ "$ADD_OTHER_FIELD" = "Y" ]; do
     fi
 done
 
-echo -e "\n##################"
-echo -e "# Generate certs #"
-echo -e "##################\n"
-
-######
-# CA #
-######
+# Generate certs
 
 echo -e "# CA\n"
 
@@ -275,10 +247,6 @@ openssl genrsa -des3 -passout pass:$PASSPHRASE -out $PATH_CA/ca.key $RSABITS
 
 # Create Authority Certificate
 openssl req -new -x509 -days $EXPIREDAYS -key $PATH_CA/ca.key -out $PATH_CA/ca.crt -passin pass:$PASSPHRASE -subj "/C=$GK_C/ST=$GK_ST/L=$GK_L/O=$GK_O/OU=$GK_OU/CN=$GK_UN$GK_emailAddress$OTHER_FIELDS" -extensions v3_ca
-
-##########
-# SERVER #
-##########
 
 echo -e "\n# Server\n"
 
